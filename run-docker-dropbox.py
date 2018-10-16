@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import signal
 import sys
 import os
@@ -59,7 +61,7 @@ def start_dropbox_docker(instanceName):
 def stop_dropbox_docker(instanceName):
     subprocess.check_call( \
             ['docker', 'stop', '{0}'.format(instanceName)])
-
+            
 def get_dropbox_status(instanceName):
     return subprocess.check_output( \
             ['docker', \
@@ -67,14 +69,15 @@ def get_dropbox_status(instanceName):
             '-ti', \
             '{0}'.format(instanceName), \
             'dropbox', \
-            'status'])
+            'status']) \
+            .decode("utf-8") 
 
 def timed_status_check(instanceName):
     global indicator
     global threadHandle
     
     statusString = get_dropbox_status(instanceName)
-    print statusString
+    print(statusString)
 
     nextCheck = 5.0
     if('Up to date' in statusString):
@@ -101,17 +104,17 @@ def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     if(len(sys.argv) != 2):
-        print 'Error - no dropbox instance name passed'
+        print('Error - no dropbox instance name passed')
         sys.exit()
     else:
         instanceName = sys.argv[1]
         APPINDICATOR_ID = instanceName + '-appind'
-        print 'Dropbox instance {0}'.format(instanceName)
+        print('Dropbox instance {0}'.format(instanceName))
 
     indicator = appindicator.Indicator.new( \
             APPINDICATOR_ID, \
             os.path.abspath(syncingEmblem), \
-            appindicator.IndicatorCategory.SYSTEM_SERVICES)
+            appindicator.IndicatorCategory.APPLICATION_STATUS)
     indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
     indicator.set_title('Dropbox in docker container {0}'.format(instanceName))
     indicator.set_menu(build_menu(instanceName))
@@ -124,7 +127,7 @@ def main():
  
     gtk.main()
     threadHandle.cancel()
-    print 'Dropbox instance {0} closed'.format(instanceName)
+    print('Dropbox instance {0} closed'.format(instanceName))
 
 if __name__ == "__main__":
     main()
