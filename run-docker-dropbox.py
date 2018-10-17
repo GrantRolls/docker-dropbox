@@ -55,22 +55,36 @@ def quit(source):
     gtk.main_quit()
 
 def start_dropbox_docker(instanceName):
-    return subprocess.check_call( \
-            ['docker', 'start', '{0}'.format(instanceName)])
+    ret = 0
+    try:
+        ret = subprocess.check_call( \
+                ['docker', 'start', '{0}'.format(instanceName)])
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+    return ret
 
 def stop_dropbox_docker(instanceName):
-    subprocess.check_call( \
-            ['docker', 'stop', '{0}'.format(instanceName)])
+    try:
+        subprocess.check_call( \
+                ['docker', 'stop', '{0}'.format(instanceName)])
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+
             
 def get_dropbox_status(instanceName):
-    return subprocess.check_output( \
-            ['docker', \
-            'exec', \
-            '-ti', \
-            '{0}'.format(instanceName), \
-            'dropbox', \
-            'status']) \
-            .decode("utf-8") 
+    ret = ""
+    try:
+        ret = subprocess.check_output( \
+                ['docker', \
+                'exec', \
+                '-ti', \
+                '{0}'.format(instanceName), \
+                'dropbox', \
+                'status']) \
+                .decode("utf-8")
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+    return ret
 
 def timed_status_check(instanceName):
     global indicator
